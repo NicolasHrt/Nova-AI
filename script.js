@@ -78,7 +78,9 @@ function saveSettings() {
 }
 
 function getSettings() {
-    return JSON.parse(localStorage.getItem('chatSettings')) || {};
+    const settings = JSON.parse(localStorage.getItem('chatSettings')) || {};
+    settings.apiKey = 'YOUR_API_KEY_HERE';
+    return settings;
 }
 
 // Chat History

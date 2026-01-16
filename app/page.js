@@ -5,6 +5,18 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
+// Map des langages pour meilleure compatibilité
+const languageMap = {
+    'vue': 'markup',
+    'svelte': 'markup',
+    'html': 'markup',
+    'jsx': 'jsx',
+    'tsx': 'tsx',
+    'sh': 'bash',
+    'shell': 'bash',
+    'zsh': 'bash',
+};
+
 export default function Home() {
     const [messages, setMessages] = useState([
         { role: 'system', content: 'Tu es un assistant intelligent et utile. Réponds en français.' }
@@ -112,6 +124,7 @@ export default function Home() {
 
     const CodeBlock = ({ language, children }) => {
         const [copied, setCopied] = useState(false);
+        const mappedLang = languageMap[language] || language || 'text';
 
         const handleCopy = async () => {
             await copyCode(children);
@@ -128,7 +141,7 @@ export default function Home() {
                     </button>
                 </div>
                 <SyntaxHighlighter
-                    language={language || 'text'}
+                    language={mappedLang}
                     style={oneDark}
                     customStyle={{ margin: 0, padding: '14px', background: 'transparent' }}
                 >

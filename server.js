@@ -1,22 +1,36 @@
 import 'dotenv/config';
 import express from 'express';
-import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const app = express();
 const PORT = 3000;
 
-// Serve static files
 app.use(express.static('.'));
+app.use(express.json());
 
-// Proxy requests to OpenAI
-app.use('/api/chat', createProxyMiddleware({
-    target: 'https://api.openai.com',
-    changeOrigin: true,
-    pathRewrite: { '^/api/chat': '/v1/chat/completions' },
-    onProxyReq: (proxyReq) => {
-        proxyReq.setHeader('Authorization', `Bearer ${process.env.OPENAI_API_KEY}`);
+app.post('/api/chat', async (req, res) => {
+    try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+            },
+            body: JSON.stringify(req.body)
+        });
+
+        res.setHeader('Content-Type', 'text/event-stream');
+        response.body.pipeTo(new WritableStream({
+            write(chunk) {
+                res.write(chunk);
+            },
+            close() {
+                res.end();
+            }
+        }));
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-}));
+});
 
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);

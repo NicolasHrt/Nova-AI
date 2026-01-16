@@ -1,0 +1,9 @@
+{
+  "name": "chatgpt-clone",
+  "version": "1.0.0",
+  "description": "A ChatGPT clone interface",
+  "scripts": {
+    "start": "npx serve -p 3000",
+    "dev": "npx serve -p 3000"
+  }
+}

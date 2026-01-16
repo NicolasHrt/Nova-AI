@@ -25,6 +25,7 @@ export default function Home() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [streamingContent, setStreamingContent] = useState('');
     const textareaRef = useRef(null);
+    const abortControllerRef = useRef(null);
 
     const showMessages = messages.length > 1;
 
@@ -51,6 +52,12 @@ export default function Home() {
         await navigator.clipboard.writeText(code);
     };
 
+    const stopGeneration = () => {
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+    };
+
     const sendMessage = async () => {
         if (!input.trim() || isGenerating) return;
 
@@ -61,6 +68,9 @@ export default function Home() {
         setIsGenerating(true);
         setStreamingContent('');
 
+        abortControllerRef.current = new AbortController();
+        let assistantMessage = '';
+
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
@@ -69,7 +79,8 @@ export default function Home() {
                     model: "gpt-5.2",
                     messages: newMessages,
                     stream: true
-                })
+                }),
+                signal: abortControllerRef.current.signal
             });
 
             if (!response.ok) {
@@ -79,7 +90,6 @@ export default function Home() {
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
-            let assistantMessage = '';
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -108,10 +118,19 @@ export default function Home() {
             setMessages([...newMessages, { role: 'assistant', content: assistantMessage }]);
             setStreamingContent('');
         } catch (error) {
-            setMessages([...newMessages, { role: 'assistant', content: `Erreur: ${error.message}` }]);
-            setStreamingContent('');
+            if (error.name === 'AbortError') {
+                // Stopped by user - save what we have so far
+                if (assistantMessage) {
+                    setMessages([...newMessages, { role: 'assistant', content: assistantMessage }]);
+                }
+                setStreamingContent('');
+            } else {
+                setMessages([...newMessages, { role: 'assistant', content: `Erreur: ${error.message}` }]);
+                setStreamingContent('');
+            }
         } finally {
             setIsGenerating(false);
+            abortControllerRef.current = null;
         }
     };
 
@@ -239,15 +258,26 @@ export default function Home() {
                             rows={1}
                             autoFocus
                         />
-                        <button
-                            className="send-btn"
-                            onClick={sendMessage}
-                            disabled={!input.trim() || isGenerating}
-                        >
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <path d="M7 11L12 6L17 11M12 18V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </button>
+                        {isGenerating ? (
+                            <button
+                                className="stop-btn"
+                                onClick={stopGeneration}
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                    <rect x="6" y="6" width="12" height="12" rx="2"/>
+                                </svg>
+                            </button>
+                        ) : (
+                            <button
+                                className="send-btn"
+                                onClick={sendMessage}
+                                disabled={!input.trim()}
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M7 11L12 6L17 11M12 18V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
+                        )}
                     </div>
                 </div>
             </main>

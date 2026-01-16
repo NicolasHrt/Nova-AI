@@ -2,9 +2,6 @@
 let messages = [];
 let isGenerating = false;
 
-// API Key
-const API_KEY = 'YOUR_API_KEY_HERE';
-
 // DOM
 const chatContainer = document.getElementById('chatContainer');
 const welcomeScreen = document.getElementById('welcomeScreen');
@@ -56,11 +53,10 @@ async function sendMessage() {
     const contentDiv = assistantDiv.querySelector('.message-content');
 
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 model: 'gpt-4o',
@@ -96,7 +92,6 @@ async function sendMessage() {
                         if (delta) {
                             assistantMessage += delta;
                             contentDiv.innerHTML = formatMessage(assistantMessage) + '<span class="streaming-cursor"></span>';
-                            scrollToBottom();
                         }
                     } catch (e) {}
                 }

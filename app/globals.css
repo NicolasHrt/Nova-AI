@@ -38,6 +38,7 @@ body {
 
 ::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -52,6 +53,24 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #b1b1b1;
+}
+
+/* Scrollbar horizontal pour le code */
+.message-content pre ::-webkit-scrollbar {
+    height: 5px;
+}
+
+.message-content pre ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.message-content pre ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.message-content pre ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .app-container {

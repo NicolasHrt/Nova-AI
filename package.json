@@ -1,10 +1,8 @@
 {
   "name": "chatgpt-clone",
   "version": "1.0.0",
-  "type": "module",
   "description": "A ChatGPT clone interface",
   "scripts": {
-    "start": "node server.js",
     "dev": "node server.js"
   },
   "dependencies": {

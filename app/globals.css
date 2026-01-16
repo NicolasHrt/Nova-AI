@@ -347,6 +347,7 @@ body {
     background: var(--primary);
     margin-left: 2px;
     animation: blink 0.8s infinite;
+    vertical-align: middle;
 }
 
 @keyframes blink {

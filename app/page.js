@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -16,6 +16,115 @@ const languageMap = {
     'shell': 'bash',
     'zsh': 'bash',
 };
+
+// Composant CodeBlock mémoïsé
+const CodeBlock = memo(function CodeBlock({ language, children, onCopy }) {
+    const [copied, setCopied] = useState(false);
+    const mappedLang = languageMap[language] || language || 'text';
+
+    const handleCopy = async () => {
+        await navigator.clipboard.writeText(children);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+        <pre>
+            <div className="code-header">
+                <span>{language || 'code'}</span>
+                <button className="copy-btn" onClick={handleCopy}>
+                    {copied ? 'Copié!' : 'Copier'}
+                </button>
+            </div>
+            <SyntaxHighlighter
+                language={mappedLang}
+                style={oneDark}
+                customStyle={{ margin: 0, padding: '14px', background: 'transparent' }}
+            >
+                {children}
+            </SyntaxHighlighter>
+        </pre>
+    );
+});
+
+// Composant MessageContent mémoïsé
+const MessageContent = memo(function MessageContent({ content }) {
+    const components = useMemo(() => ({
+        code({ node, inline, className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className || '');
+            const language = match ? match[1] : '';
+
+            if (!inline && (match || String(children).includes('\n'))) {
+                return (
+                    <CodeBlock language={language}>
+                        {String(children).replace(/\n$/, '')}
+                    </CodeBlock>
+                );
+            }
+            return <code className={className} {...props}>{children}</code>;
+        }
+    }), []);
+
+    return (
+        <ReactMarkdown components={components}>
+            {content}
+        </ReactMarkdown>
+    );
+});
+
+// Composant Message mémoïsé pour éviter re-renders inutiles
+const Message = memo(function Message({ msg }) {
+    return (
+        <div className={`message ${msg.role}`}>
+            {msg.role === 'assistant' && (
+                <div className="message-avatar">N</div>
+            )}
+            <div className="message-content">
+                <MessageContent content={msg.content} />
+            </div>
+        </div>
+    );
+});
+
+// Composant streaming optimisé - parse le markdown moins fréquemment
+const StreamingMessage = memo(function StreamingMessage({ content }) {
+    const [displayContent, setDisplayContent] = useState(content);
+    const contentRef = useRef(content);
+    const timeoutRef = useRef(null);
+
+    useEffect(() => {
+        contentRef.current = content;
+
+        // Mettre à jour immédiatement si c'est le premier contenu ou si pas de timeout en cours
+        if (!timeoutRef.current) {
+            setDisplayContent(content);
+            // Throttle les updates suivantes à 50ms
+            timeoutRef.current = setTimeout(() => {
+                timeoutRef.current = null;
+                // Mettre à jour avec le dernier contenu
+                if (contentRef.current !== content) {
+                    setDisplayContent(contentRef.current);
+                }
+            }, 50);
+        }
+
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+            }
+        };
+    }, [content]);
+
+    // Flush final quand le contenu arrête de changer
+    useEffect(() => {
+        return () => {
+            setDisplayContent(contentRef.current);
+        };
+    }, []);
+
+    return <MessageContent content={displayContent} />;
+});
 
 export default function Home() {
     const [messages, setMessages] = useState([
@@ -48,17 +157,13 @@ export default function Home() {
         autoResize();
     }, [input]);
 
-    const copyCode = async (code) => {
-        await navigator.clipboard.writeText(code);
-    };
-
-    const stopGeneration = () => {
+    const stopGeneration = useCallback(() => {
         if (abortControllerRef.current) {
             abortControllerRef.current.abort();
         }
-    };
+    }, []);
 
-    const sendMessage = async () => {
+    const sendMessage = useCallback(async () => {
         if (!input.trim() || isGenerating) return;
 
         const userMessage = { role: 'user', content: input.trim() };
@@ -132,65 +237,14 @@ export default function Home() {
             setIsGenerating(false);
             abortControllerRef.current = null;
         }
-    };
+    }, [input, isGenerating, messages]);
 
-    const handleKeyDown = (e) => {
+    const handleKeyDown = useCallback((e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendMessage();
         }
-    };
-
-    const CodeBlock = ({ language, children }) => {
-        const [copied, setCopied] = useState(false);
-        const mappedLang = languageMap[language] || language || 'text';
-
-        const handleCopy = async () => {
-            await copyCode(children);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        };
-
-        return (
-            <pre>
-                <div className="code-header">
-                    <span>{language || 'code'}</span>
-                    <button className="copy-btn" onClick={handleCopy}>
-                        {copied ? 'Copié!' : 'Copier'}
-                    </button>
-                </div>
-                <SyntaxHighlighter
-                    language={mappedLang}
-                    style={oneDark}
-                    customStyle={{ margin: 0, padding: '14px', background: 'transparent' }}
-                >
-                    {children}
-                </SyntaxHighlighter>
-            </pre>
-        );
-    };
-
-    const MessageContent = ({ content }) => (
-        <ReactMarkdown
-            components={{
-                code({ node, inline, className, children, ...props }) {
-                    const match = /language-(\w+)/.exec(className || '');
-                    const language = match ? match[1] : '';
-
-                    if (!inline && (match || String(children).includes('\n'))) {
-                        return (
-                            <CodeBlock language={language}>
-                                {String(children).replace(/\n$/, '')}
-                            </CodeBlock>
-                        );
-                    }
-                    return <code className={className} {...props}>{children}</code>;
-                }
-            }}
-        >
-            {content}
-        </ReactMarkdown>
-    );
+    }, [sendMessage]);
 
     return (
         <div className="app-container">
@@ -215,14 +269,7 @@ export default function Home() {
                     ) : (
                         <div className="messages active">
                             {messages.slice(1).map((msg, i) => (
-                                <div key={i} className={`message ${msg.role}`}>
-                                    {msg.role === 'assistant' && (
-                                        <div className="message-avatar">N</div>
-                                    )}
-                                    <div className="message-content">
-                                        <MessageContent content={msg.content} />
-                                    </div>
-                                </div>
+                                <Message key={i} msg={msg} />
                             ))}
                             {isGenerating && (
                                 <div className="message assistant">
@@ -230,7 +277,7 @@ export default function Home() {
                                     <div className="message-content">
                                         {streamingContent ? (
                                             <>
-                                                <MessageContent content={streamingContent} />
+                                                <StreamingMessage content={streamingContent} />
                                                 <span className="streaming-cursor"></span>
                                             </>
                                         ) : (

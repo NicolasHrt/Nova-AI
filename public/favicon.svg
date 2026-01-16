@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="novaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="50%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#novaGrad)"/>
+
+  <!-- Nova star burst -->
+  <g fill="#ffffff" filter="url(#glow)">
+    <!-- Vertical ray -->
+    <path d="M256 60 L272 220 L256 200 L240 220 Z" opacity="0.95"/>
+    <path d="M256 452 L272 292 L256 312 L240 292 Z" opacity="0.95"/>
+    <!-- Horizontal ray -->
+    <path d="M60 256 L220 240 L200 256 L220 272 Z" opacity="0.95"/>
+    <path d="M452 256 L292 240 L312 256 L292 272 Z" opacity="0.95"/>
+    <!-- Diagonal rays -->
+    <path d="M117 117 L210 210 L190 200 L200 190 Z" opacity="0.8"/>
+    <path d="M395 117 L302 210 L322 200 L312 190 Z" opacity="0.8"/>
+    <path d="M117 395 L210 302 L190 312 L200 322 Z" opacity="0.8"/>
+    <path d="M395 395 L302 302 L322 312 L312 322 Z" opacity="0.8"/>
+  </g>
+
+  <!-- Core glow -->
+  <circle cx="256" cy="256" r="70" fill="#ffffff" opacity="0.3"/>
+  <circle cx="256" cy="256" r="50" fill="#ffffff" opacity="0.6"/>
+  <circle cx="256" cy="256" r="32" fill="#ffffff"/>
+</svg>

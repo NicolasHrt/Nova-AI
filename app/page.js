@@ -4,6 +4,37 @@ import { useState, useRef, useEffect, useCallback, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
+
+// Prétraitement pour normaliser la syntaxe LaTeX
+function preprocessMath(content) {
+    if (!content) return content;
+
+    let result = content;
+
+    // Convertir \[ ... \] en $$ ... $$
+    result = result.replace(/\\\[([\s\S]*?)\\\]/g, '\n$$\n$1\n$$\n');
+
+    // Convertir \( ... \) en $ ... $
+    result = result.replace(/\\\(([\s\S]*?)\\\)/g, '$$$1$$');
+
+    // Détecter [ ... ] contenant du LaTeX (commandes comme \frac, \int, \sum, etc.)
+    // et les convertir en blocs $$
+    result = result.replace(/\[\s*((?:[^[\]]*\\[a-zA-Z]+[^[\]]*)+)\s*\]/g, (match, inner) => {
+        // Vérifier que c'est vraiment du LaTeX
+        if (/\\[a-zA-Z]+/.test(inner)) {
+            return '\n$$\n' + inner.trim() + '\n$$\n';
+        }
+        return match;
+    });
+
+    // Convertir (\ ... ) pour les formules inline avec LaTeX
+    result = result.replace(/\(\\([a-zA-Z]+(?:\{[^}]*\}|\[[^\]]*\]|[^)]*)*)\)/g, '$\\$1$');
+
+    return result;
+}
 
 // Map des langages pour meilleure compatibilité
 const languageMap = {
@@ -49,6 +80,8 @@ const CodeBlock = memo(function CodeBlock({ language, children, onCopy }) {
 
 // Composant MessageContent mémoïsé
 const MessageContent = memo(function MessageContent({ content }) {
+    const processedContent = useMemo(() => preprocessMath(content), [content]);
+
     const components = useMemo(() => ({
         code({ node, inline, className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || '');
@@ -66,8 +99,12 @@ const MessageContent = memo(function MessageContent({ content }) {
     }), []);
 
     return (
-        <ReactMarkdown components={components}>
-            {content}
+        <ReactMarkdown
+            remarkPlugins={[remarkMath]}
+            rehypePlugins={[rehypeKatex]}
+            components={components}
+        >
+            {processedContent}
         </ReactMarkdown>
     );
 });
@@ -128,7 +165,7 @@ const StreamingMessage = memo(function StreamingMessage({ content }) {
 
 export default function Home() {
     const [messages, setMessages] = useState([
-        { role: 'system', content: 'Tu es un assistant intelligent et utile. Réponds en français.' }
+        { role: 'system', content: 'Tu es un assistant intelligent et utile. Réponds en français. Pour les formules mathématiques, utilise la syntaxe LaTeX avec $...$ pour les formules inline et $$...$$ pour les formules en bloc.' }
     ]);
     const [input, setInput] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);

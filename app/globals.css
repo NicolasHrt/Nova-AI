@@ -177,6 +177,7 @@ body {
         opacity: 0;
         transform: translateY(16px) scale(0.98);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -188,6 +189,7 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -257,14 +259,42 @@ body {
     box-shadow: var(--shadow-md);
 }
 
-.message-content p { margin-bottom: 12px; }
-.message-content p:last-child { margin-bottom: 0; }
-.message-content ul, .message-content ol { margin: 12px 0; padding-left: 20px; }
-.message-content li { margin-bottom: 6px; }
-.message-content h1, .message-content h2, .message-content h3 { margin: 16px 0 10px; color: var(--text); }
-.message-content h1 { font-size: 20px; }
-.message-content h2 { font-size: 17px; }
-.message-content h3 { font-size: 15px; }
+.message-content p {
+    margin-bottom: 12px;
+}
+
+.message-content p:last-child {
+    margin-bottom: 0;
+}
+
+.message-content ul,
+.message-content ol {
+    margin: 12px 0;
+    padding-left: 20px;
+}
+
+.message-content li {
+    margin-bottom: 6px;
+}
+
+.message-content h1,
+.message-content h2,
+.message-content h3 {
+    margin: 16px 0 10px;
+    color: var(--text);
+}
+
+.message-content h1 {
+    font-size: 20px;
+}
+
+.message-content h2 {
+    font-size: 17px;
+}
+
+.message-content h3 {
+    font-size: 15px;
+}
 
 /* Code */
 .message-content pre {
@@ -336,6 +366,55 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+/* Math / KaTeX styles */
+.message-content .katex-display {
+    margin: 16px 0;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #f8f9fc 0%, #f0f2f8 100%);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.message-content .katex-display > .katex {
+    text-align: left;
+}
+
+.message-content .katex {
+    font-size: 1.1em;
+    color: var(--text);
+}
+
+.message-content .katex-display .katex {
+    font-size: 1.15em;
+}
+
+.message-content p .katex {
+    padding: 2px 4px;
+    background: rgba(37, 99, 235, 0.05);
+    border-radius: 4px;
+}
+
+/* Scrollbar pour les formules longues */
+.message-content .katex-display::-webkit-scrollbar {
+    height: 4px;
+}
+
+.message-content .katex-display::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 2px;
+}
+
+.message-content .katex-display::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 2px;
+}
+
+.message-content .katex-display::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
+}
+
 /* Typing */
 .typing-indicator {
     display: flex;
@@ -351,15 +430,27 @@ body {
     animation: bounce 1.4s infinite ease-in-out;
 }
 
-.typing-indicator span:nth-child(1) { animation-delay: 0s; }
-.typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
-.typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+.typing-indicator span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.3s;
+}
 
 @keyframes bounce {
-    0%, 60%, 100% {
+
+    0%,
+    60%,
+    100% {
         transform: translateY(0);
         opacity: 0.4;
     }
+
     30% {
         transform: translateY(-8px);
         opacity: 1;
@@ -379,6 +470,7 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -492,9 +584,12 @@ body {
 }
 
 @keyframes pulseStop {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
     }
+
     50% {
         box-shadow: 0 2px 16px rgba(239, 68, 68, 0.5);
     }
@@ -512,9 +607,26 @@ body {
 }
 
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-    20%, 40%, 60%, 80% { transform: translateX(4px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-4px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(4px);
+    }
 }
 
 /* Cursor */
@@ -530,10 +642,13 @@ body {
 }
 
 @keyframes cursorPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
         transform: scaleY(1);
     }
+
     50% {
         opacity: 0.5;
         transform: scaleY(0.8);
@@ -545,16 +660,20 @@ body {
     .welcome-screen h1 {
         font-size: 38px;
     }
+
     .messages {
         padding: 24px 16px;
     }
+
     .input-area {
         padding: 0 16px 24px;
     }
+
     .message.user .message-content,
     .message.assistant .message-content {
         max-width: 88%;
     }
+
     .input-container {
         border-radius: 14px;
     }
@@ -562,7 +681,10 @@ body {
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+
+    *,
+    *::before,
+    *::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;

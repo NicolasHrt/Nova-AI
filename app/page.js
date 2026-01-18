@@ -165,7 +165,7 @@ const StreamingMessage = memo(function StreamingMessage({ content }) {
 
 export default function Home() {
     const [messages, setMessages] = useState([
-        { role: 'system', content: 'Tu es un assistant intelligent et utile. Réponds en français. Pour les formules mathématiques, utilise la syntaxe LaTeX avec $...$ pour les formules inline et $$...$$ pour les formules en bloc.' }
+        { role: 'system', content: 'Tu es un assistant intelligent et utile. Réponds en français. Pour les formules mathématiques, utilise la syntaxe LaTeX avec $...$ pour les formules inline et $$...$$ pour les formules en bloc. IMPORTANT: pour les délimiteurs adaptatifs, utilise \\left( et \\right) pour les parenthèses, \\left[ et \\right] pour les crochets, \\left\\{ et \\right\\} pour les accolades. Ne jamais utiliser \\left$ ou \\right$.' }
     ]);
     const [input, setInput] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);

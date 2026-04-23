@@ -218,7 +218,7 @@ export default function Home() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model: "gpt-5.2",
+                    model: "gpt-5.4",
                     messages: newMessages,
                     stream: true
                 }),
@@ -252,7 +252,7 @@ export default function Home() {
                                 assistantMessage += delta;
                                 setStreamingContent(assistantMessage);
                             }
-                        } catch (e) {}
+                        } catch (e) { }
                     }
                 }
             }
@@ -348,7 +348,7 @@ export default function Home() {
                                 onClick={stopGeneration}
                             >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                    <rect x="6" y="6" width="12" height="12" rx="2"/>
+                                    <rect x="6" y="6" width="12" height="12" rx="2" />
                                 </svg>
                             </button>
                         ) : (
@@ -358,7 +358,7 @@ export default function Home() {
                                 disabled={!input.trim()}
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                    <path d="M7 11L12 6L17 11M12 18V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M7 11L12 6L17 11M12 18V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             </button>
                         )}
